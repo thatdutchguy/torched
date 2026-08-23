@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "torched:item/sticky_copper_torch"
+  }
+}

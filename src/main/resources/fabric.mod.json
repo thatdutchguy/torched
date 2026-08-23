@@ -1,0 +1,55 @@
+{
+    "schemaVersion": 1,
+    "id": "torched",
+    "version": "${version}",
+    "name": "Torched",
+    "description": "Throwable torches and sticky torches",
+    "authors": [
+        "thatdutchguy"
+    ],
+    "contact": {
+        "homepage": "https://thatdutchguy.github.io/torched",
+        "sources": "https://github.com/thatdutchguy/torched",
+        "issues": "https://github.com/thatdutchguy/torched/issues"
+    },
+    "license": "LGPL-3.0",
+    "icon": "assets/torched/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            {
+                "value": "io.github.thatdutchguy.torched.Torched",
+                "adapter": "kotlin"
+            }
+        ],
+        "client": [
+            {
+                "value": "io.github.thatdutchguy.torched.client.TorchedClient",
+                "adapter": "kotlin"
+            }
+        ],
+        "fabric-datagen": [
+            {
+                "value": "io.github.thatdutchguy.torched.client.TorchedDataGenerator",
+                "adapter": "kotlin"
+            }
+        ],
+        "modmenu": [
+            {
+                "value": "io.github.thatdutchguy.torched.client.gui.TorchedModMenu",
+                "adapter": "kotlin"
+            }
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.19.3",
+        "minecraft": "~26.2",
+        "java": ">=25",
+        "fabric-api": "*",
+        "fabric-language-kotlin": "*"
+    },
+    "suggests": {
+        "modmenu": "*",
+        "lambdynamiclights": "*"
+    }
+}

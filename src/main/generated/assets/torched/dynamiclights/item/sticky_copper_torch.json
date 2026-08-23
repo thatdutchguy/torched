@@ -1,0 +1,10 @@
+{
+  "luminance": {
+    "type": "block",
+    "block": "minecraft:copper_torch"
+  },
+  "match": {
+    "items": "torched:sticky_copper_torch"
+  },
+  "water_sensitive": true
+}

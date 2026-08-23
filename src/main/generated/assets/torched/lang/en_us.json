@@ -1,0 +1,13 @@
+{
+  "item.torched.sticky_copper_torch": "Sticky Copper Torch",
+  "item.torched.sticky_redstone_torch": "Sticky Redstone Torch",
+  "item.torched.sticky_soul_torch": "Sticky Soul Torch",
+  "item.torched.sticky_torch": "Sticky Torch",
+  "key.torched.throw_torch": "Throw Torch",
+  "options.torched.throw_on_use": "Throw on Right-Click",
+  "options.torched.throw_on_use.tooltip": "Right-clicking with nothing in range throws the torch you are holding. Turn this off to throw only with the throw key.",
+  "options.torched.throw_vanilla_torches": "Throw Plain Torches",
+  "options.torched.throw_vanilla_torches.tooltip": "Whether ordinary torches can be thrown, or only sticky ones. Servers enforce their own setting, so turning this on cannot override a server that has it off.",
+  "options.torched.title": "Torched Settings",
+  "tag.item.torched.throwable_torches": "Throwable Torches"
+}

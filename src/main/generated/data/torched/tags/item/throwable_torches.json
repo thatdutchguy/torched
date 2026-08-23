@@ -1,0 +1,12 @@
+{
+  "values": [
+    "minecraft:torch",
+    "torched:sticky_torch",
+    "minecraft:soul_torch",
+    "torched:sticky_soul_torch",
+    "minecraft:redstone_torch",
+    "torched:sticky_redstone_torch",
+    "minecraft:copper_torch",
+    "torched:sticky_copper_torch"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "match": { "type": "torched:throwable_torch_entity" },
+  "luminance": {
+    "type": "lambdynlights:projectile/throwable_item"
+  }
+}
