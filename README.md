@@ -70,7 +70,8 @@ vanilla counterparts.
 ## AI Disclosure
 
 All of the mod code and tests (everthing under `src`) is human-written, though
-AI was used for code review.
+AI was used for code review. All documentation is human-written, and all image
+and video assets are human-made.
 
 Code under [build-tools/gametest-entrypoint-validation](build-tools/gametest-entrypoint-verification) is ai-assisted,
 human-reviewed and customized.

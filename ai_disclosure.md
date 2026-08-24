@@ -5,10 +5,13 @@ models-used:
 providers:
   - OpenAI
 scope: |
-  With the exception of the gametest-entrypoint-verification gradle plugin, all
-  code and tests are human-written, with AI only used for code review.  
-  The code under gametest-entrypoint-verification has been co-authored by ai.  
-  All documentation is human-written.
+  With the exception of the build-tools/gametest-entrypoint-verification gradle
+  plugin, all code and tests are human-written, with AI only used for code
+  review.  
+  All documentation is human-written, and all image and video assets are
+  human-made.
+  The code under build-tools/gametest-entrypoint-verification has been
+  co-authored by ai.  
 last-updated: 2026-08-20
 ---
 
