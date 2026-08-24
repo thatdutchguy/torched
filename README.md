@@ -78,7 +78,7 @@ human-reviewed and customized.
 
 Any file touched by AI has the appropriate SPDX-AI headers.
 
-Also see [ai_disclosure.md](ai_disclosure.md) and 
+Also see [ai_disclosure.md](ai_disclosure.md). 
 
 ## License
 
