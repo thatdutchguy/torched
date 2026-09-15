@@ -42,7 +42,7 @@ gametest configuration
 ### Docs
 
 - [Fabric Developer Guides](https://docs.fabricmc.net/develop/)
-- [Fabric API Javadoc](https://maven.fabricmc.net/docs/fabric-api-0.158.0+26.2/)
+- [Fabric API Javadoc](https://maven.fabricmc.net/docs/fabric-api-0.160.5+26.3/)
 - [Fabric Yarn Javadoc](https://maven.fabricmc.net/docs/yarn-1.21.11+build.6/): Minecraft API bindings
 - [LambDynamicLights documentation](https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/) 
 

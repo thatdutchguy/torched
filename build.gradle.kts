@@ -4,7 +4,7 @@ import io.github.thatdutchguy.minecraft_modding.gradle.gametest.VerifyGameTestEn
 plugins {
     id("net.fabricmc.fabric-loom")
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "2.4.10"
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
     java
     id("gametest-entrypoint-verification")
 }
