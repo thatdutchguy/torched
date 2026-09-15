@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "torched:sticky_copper_torch"
+        "recipes": "torched:sticky_copper_torch"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

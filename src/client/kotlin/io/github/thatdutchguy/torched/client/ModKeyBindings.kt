@@ -8,7 +8,7 @@ object ModKeyBindings {
     val THROW_TORCH: KeyMapping = KeyMappingHelper.registerKeyMapping(
         KeyMapping(
             "key.torched.throw_torch",
-            InputConstants.Type.KEYSYM,
+            InputConstants.Type.KEYBOARD,
             InputConstants.KEY_G,
             KeyMapping.Category.GAMEPLAY,
         )

@@ -19,7 +19,6 @@ import net.minecraft.client.Minecraft
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.block.Blocks
-import org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT
 
 class ThrowByKeyIsAccepted : FabricClientGameTest {
     override fun runTest(context: ClientGameTestContext) = context.withTorches(4) { singleplayer ->
@@ -50,7 +49,7 @@ class ThrowByMouseIsAccepted : FabricClientGameTest {
     override fun runTest(context: ClientGameTestContext) = context.withTorches(4) { singleplayer ->
         context.onClient { check(TorchedConfig.data.throwOnUse) { "setup: throwOnUse is disabled" } }
         singleplayer.lookUp()
-        context.input.pressMouse(GLFW_MOUSE_BUTTON_RIGHT)
+        context.pressRightMouseButton()
 
         singleplayer.connection.waitForServerboundPackets()
         singleplayer.connection.waitForClientboundPackets()
@@ -71,7 +70,7 @@ class UseHookDisabledPlacesInstead : FabricClientGameTest {
         try {
             context.onClient { TorchedConfig.update { it.copy(throwOnUse = false) } }
             singleplayer.lookDown()
-            context.input.pressMouse(GLFW_MOUSE_BUTTON_RIGHT)
+            context.pressRightMouseButton()
 
             singleplayer.connection.waitForServerboundPackets()
             singleplayer.connection.waitForClientboundPackets()
@@ -246,3 +245,4 @@ private fun TestSingleplayerContext.lookDown() {
 
 private fun ClientGameTestContext.onClient(action: (Minecraft) -> Unit) = runOnClient<Throwable>(action)
 private fun TestServerContext.onServer(action: (MinecraftServer) -> Unit) = runOnServer<Throwable>(action)
+private fun ClientGameTestContext.pressRightMouseButton() = input.pressMouse(InputConstants.MOUSE_BUTTON_RIGHT)

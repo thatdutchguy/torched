@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "torched:sticky_torch"
+        "recipes": "torched:sticky_torch"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
