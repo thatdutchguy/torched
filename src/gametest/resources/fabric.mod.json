@@ -49,7 +49,9 @@
             "io.github.thatdutchguy.torched.gametest.client.ThrowKeyRespectsBinding",
             "io.github.thatdutchguy.torched.gametest.client.RefusedThrowIsResynced",
             "io.github.thatdutchguy.torched.gametest.client.ServerRateLimitIsEnforced",
-            "io.github.thatdutchguy.torched.gametest.client.ServerRateLimitIsEnforcedInCreativeMode"
+            "io.github.thatdutchguy.torched.gametest.client.ServerRateLimitIsEnforcedInCreativeMode",
+            "io.github.thatdutchguy.torched.gametest.client.VanillaTorchThrowingPolicyPublishes",
+            "io.github.thatdutchguy.torched.gametest.client.VanillaThrowRespectsServerPolicy"
         ]
     }
 }

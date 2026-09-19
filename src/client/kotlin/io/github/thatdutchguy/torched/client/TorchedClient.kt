@@ -20,8 +20,13 @@ import net.minecraft.world.level.Level
 object TorchedClient : ClientModInitializer {
     private var tickCount: Int = 0
 
+    private val allowVanilla: Boolean
+        get() = allowVanillaTorchThrowing(VanillaTorchThrowingPolicyClient.permissions)
+
     override fun onInitializeClient() {
         EntityRenderers.register(ModEntityTypes.THROWABLE_TORCH_ENTITY, ::ThrownItemRenderer)
+
+        VanillaTorchThrowingPolicyClient.initialize()
 
         ClientThrowRateLimiter.initialize()
         ClientTickEvents.END_CLIENT_TICK.register { _ -> tickCount++ }
@@ -34,7 +39,7 @@ object TorchedClient : ClientModInitializer {
     private fun handleUse(level: Level, player: Player, hand: InteractionHand): InteractionResult? {
         if (!level.isClientSide) return null // "use" trigger is client-side only
         if (!TorchedConfig.data.throwOnUse) return null
-        if (!TorchThrowing.canThrow(player.getItemInHand(hand))) return null
+        if (!TorchThrowing.canThrow(player.getItemInHand(hand), allowVanilla)) return null
 
         return sendThrow(player, hand)
     }
@@ -63,8 +68,8 @@ object TorchedClient : ClientModInitializer {
     }
 
     private fun throwableHand(player: LocalPlayer): InteractionHand? = when {
-        TorchThrowing.canThrow(player.mainHandItem) -> InteractionHand.MAIN_HAND
-        TorchThrowing.canThrow(player.offhandItem) -> InteractionHand.OFF_HAND
+        TorchThrowing.canThrow(player.mainHandItem, allowVanilla) -> InteractionHand.MAIN_HAND
+        TorchThrowing.canThrow(player.offhandItem, allowVanilla) -> InteractionHand.OFF_HAND
         else -> null
     }
 }
