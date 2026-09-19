@@ -11,8 +11,6 @@ object TorchThrowing {
     private val throwUncertainty = 0.0f
     private val throwOffset = 0.0f
 
-    fun canThrow(stack: ItemStack): Boolean = canThrow(stack, TorchedConfig.data.throwVanillaTorches)
-
     fun canThrow(stack: ItemStack, allowVanilla: Boolean): Boolean {
         if (stack.isEmpty) return false
         if (stack.item is ThrowableTorchItem) return true
@@ -27,7 +25,7 @@ object TorchThrowing {
         if (player.isSpectator) return false
 
         val stack = player.getItemInHand(hand)
-        if (!canThrow(stack)) return false
+        if (!canThrow(stack, TorchedConfig.data.throwVanillaTorches)) return false
 
         val entity = ThrowableTorchEntity(level, player)
         entity.item = stack.copyWithCount(1)

@@ -32,7 +32,12 @@ class ModLanguageProvider(
         builder.add(
             "options.torched.throw_vanilla_torches.tooltip",
             "Whether ordinary torches can be thrown, or only sticky ones. " +
-                    "Server configuration will override this setting.",
+                    "Requires permission from the server.",
+        )
+
+        builder.add(
+            "options.torched.throw_vanilla_torches.server_disabled",
+            "WARNING: Server has disabled throwing plain torches.",
         )
 
         builder.add("tag.item.torched.throwable_torches", "Throwable Torches")

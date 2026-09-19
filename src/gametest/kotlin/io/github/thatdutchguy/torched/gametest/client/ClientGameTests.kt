@@ -8,7 +8,9 @@ import io.github.thatdutchguy.torched.ThrowRateLimit
 import io.github.thatdutchguy.torched.ThrowTorchPayload
 import io.github.thatdutchguy.torched.TorchThrowing
 import io.github.thatdutchguy.torched.TorchedConfig
+import io.github.thatdutchguy.torched.VanillaTorchThrowingPolicy
 import io.github.thatdutchguy.torched.client.ModKeyBindings
+import io.github.thatdutchguy.torched.client.VanillaTorchThrowingPolicyClient
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
@@ -195,9 +197,138 @@ class ServerRateLimitIsEnforcedInCreativeMode : FabricClientGameTest {
     }
 }
 
+//region VanillaTorchThrowingPolicy
+
+class VanillaTorchThrowingPolicyPublishes : FabricClientGameTest {
+    override fun runTest(context: ClientGameTestContext) = context.preservingConfig {
+        TorchedConfig.update { it.copy(throwVanillaTorches = false) }
+
+        // assert initially unset
+        checkServerPolicy(context, null)
+
+        context.worldBuilder().create().use { singleplayer ->
+            singleplayer.server.onServer {
+                VanillaTorchThrowingPolicy.publish(true)
+            }
+            singleplayer.connection.waitForClientboundPackets()
+            checkServerPolicy(context, true)
+
+            singleplayer.server.onServer {
+                VanillaTorchThrowingPolicy.publish(false)
+            }
+            singleplayer.connection.waitForClientboundPackets()
+            checkServerPolicy(context, false)
+        }
+
+        checkServerPolicy(context, null)
+    }
+}
+
+class VanillaThrowRespectsServerPolicy : FabricClientGameTest {
+    override fun runTest(context: ClientGameTestContext) = context.preservingConfig {
+
+        fun publishTorchThrowingPolicy(singleplayer: TestSingleplayerContext, allowed: Boolean) {
+            singleplayer.server.onServer {
+                VanillaTorchThrowingPolicy.publish(allowed)
+            }
+            singleplayer.connection.waitForClientboundPackets()
+        }
+
+        fun checkCounts(singleplayer: TestSingleplayerContext, clientCount: Int, serverCount: Int) {
+            // NOTE: this doesn't necessarily test no throw was predicted by the client, because the
+            // helper methods that press a mouse button or key also wait one tick, and a correction
+            // could have been sent in that time.
+            context.onClient { client ->
+                val count = client.player!!.getItemInHand(InteractionHand.MAIN_HAND).count
+                check(count == clientCount) { "client: expected $clientCount torches, got $count" }
+            }
+            singleplayer.connection.waitForServerboundPackets()
+            singleplayer.connection.waitForClientboundPackets()
+            context.assertTorchCounts(singleplayer, clientCount = clientCount, serverCount = serverCount)
+        }
+
+        fun mouseThrowThenCheck(singleplayer: TestSingleplayerContext, clientCount: Int, serverCount: Int) {
+            context.pressRightMouseButton()
+            checkCounts(singleplayer, clientCount, serverCount)
+        }
+
+        fun keyboardThrowThenCheck(singleplayer: TestSingleplayerContext, clientCount: Int, serverCount: Int) {
+            val throwKeyBinding = ModKeyBindings.THROW_TORCH
+            context.onClient { check(!throwKeyBinding.isUnbound) { "setup: key binding is unbound" } }
+            context.input.pressKey(throwKeyBinding)
+            checkCounts(singleplayer, clientCount, serverCount)
+        }
+
+        TorchedConfig.update { it.copy(throwVanillaTorches = true) }
+        context.withTorches(4, torchType = "minecraft:torch") { singleplayer ->
+            publishTorchThrowingPolicy(singleplayer, false)
+            checkPolicies(context, serverAllowed = false, clientAllowed = true)
+            mouseThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+            keyboardThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+        }
+
+        TorchedConfig.update { it.copy(throwVanillaTorches = false) }
+        context.withTorches(4, torchType = "minecraft:torch") { singleplayer ->
+            publishTorchThrowingPolicy(singleplayer, true)
+            checkPolicies(context, serverAllowed = true, clientAllowed = false)
+            mouseThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+            keyboardThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+        }
+
+        TorchedConfig.update { it.copy(throwVanillaTorches = false) }
+        context.withTorches(4, torchType = "minecraft:torch") { singleplayer ->
+            checkPolicies(context, serverAllowed = false, clientAllowed = false)
+            mouseThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+            keyboardThrowThenCheck(singleplayer, clientCount = 4, serverCount = 4)
+        }
+
+        TorchedConfig.update { it.copy(throwVanillaTorches = true) }
+        context.withTorches(4, torchType = "minecraft:torch") { singleplayer ->
+            checkPolicies(context, serverAllowed = true, clientAllowed = true)
+            mouseThrowThenCheck(singleplayer, clientCount = 3, serverCount = 3)
+            keyboardThrowThenCheck(singleplayer, clientCount = 2, serverCount = 2)
+        }
+    }
+}
+
+private fun checkServerPolicy(context: ClientGameTestContext, serverAllowed: Boolean?) {
+    context.onClient {
+        check(serverAllowed == VanillaTorchThrowingPolicyClient.permissions.serverAllowed) {
+            "client: expected serverAllowed to be $serverAllowed"
+        }
+    }
+}
+
+private fun checkClientPolicy(context: ClientGameTestContext, clientAllowed: Boolean) {
+    context.onClient {
+        check(clientAllowed == VanillaTorchThrowingPolicyClient.permissions.clientAllowed) {
+            "client: expected clientAllowed to be $clientAllowed"
+        }
+    }
+}
+
+private fun checkPolicies(context: ClientGameTestContext, serverAllowed: Boolean?, clientAllowed: Boolean) {
+    checkServerPolicy(context, serverAllowed)
+    checkClientPolicy(context, clientAllowed)
+}
+
+//endregion
+
+//region Test Helpers
+
+private fun ClientGameTestContext.preservingConfig(body: () -> Unit) {
+    val originalConfigData = TorchedConfig.data
+    try {
+        body()
+    } finally {
+        onClient { TorchedConfig.update { originalConfigData } }
+    }
+}
+
 private fun ClientGameTestContext.withTorches(
     count: Int,
     hand: InteractionHand = InteractionHand.MAIN_HAND,
+    torchType: String = "torched:sticky_torch",
     body: (TestSingleplayerContext) -> Unit
 ) {
     val slot = when (hand) {
@@ -206,7 +337,7 @@ private fun ClientGameTestContext.withTorches(
     }
     worldBuilder().create().use { singleplayer ->
         singleplayer.connection.waitForChunksRender()
-        singleplayer.server.runCommand("item replace entity @p $slot with torched:sticky_torch $count")
+        singleplayer.server.runCommand("item replace entity @p $slot with $torchType $count")
         singleplayer.connection.waitForClientboundPackets()
 
         onClient { client ->
@@ -246,3 +377,7 @@ private fun TestSingleplayerContext.lookDown() {
 
 private fun ClientGameTestContext.onClient(action: (Minecraft) -> Unit) = runOnClient<Throwable>(action)
 private fun TestServerContext.onServer(action: (MinecraftServer) -> Unit) = runOnServer<Throwable>(action)
+private fun ClientGameTestContext.pressRightMouseButton() = input.pressMouse(InputConstants.MOUSE_BUTTON_RIGHT)
+
+//endregion
+

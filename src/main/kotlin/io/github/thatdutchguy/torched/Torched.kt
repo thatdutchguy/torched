@@ -18,6 +18,7 @@ object Torched : ModInitializer {
         logger.info("Initializing Throwable Torch Mod $version")
 
         TorchedConfig.load()
+        VanillaTorchThrowingPolicy.initialize()
 
         ModItems.initialize()
         ModEntityTypes.initialize()
@@ -37,6 +38,10 @@ object Torched : ModInitializer {
     }
 
     private fun registerNetworking() {
+        PayloadTypeRegistry.clientboundPlay().register(
+            VanillaTorchThrowingPolicyPayload.TYPE,
+            VanillaTorchThrowingPolicyPayload.STREAM_CODEC
+        )
         PayloadTypeRegistry.serverboundPlay().register(ThrowTorchPayload.TYPE, ThrowTorchPayload.STREAM_CODEC)
         ServerPlayNetworking.registerGlobalReceiver(ThrowTorchPayload.TYPE) { payload, context ->
             val player = context.player()
