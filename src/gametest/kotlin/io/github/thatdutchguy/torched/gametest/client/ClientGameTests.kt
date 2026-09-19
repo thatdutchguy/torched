@@ -4,9 +4,11 @@ package io.github.thatdutchguy.torched.gametest.client
 
 import com.mojang.blaze3d.platform.InputConstants
 import io.github.thatdutchguy.torched.ModEntityTypes
+import io.github.thatdutchguy.torched.ModItems
 import io.github.thatdutchguy.torched.ThrowRateLimit
 import io.github.thatdutchguy.torched.ThrowTorchPayload
 import io.github.thatdutchguy.torched.TorchThrowing
+import io.github.thatdutchguy.torched.TorchVariant
 import io.github.thatdutchguy.torched.TorchedConfig
 import io.github.thatdutchguy.torched.VanillaTorchThrowingPolicy
 import io.github.thatdutchguy.torched.client.ModKeyBindings
@@ -20,6 +22,7 @@ import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Blocks
 
 class ThrowByKeyIsAccepted : FabricClientGameTest {
@@ -313,6 +316,51 @@ private fun checkPolicies(context: ClientGameTestContext, serverAllowed: Boolean
 
 //endregion
 
+class SameTickSwitchAndThrow : FabricClientGameTest {
+    private fun clickDefaultKey(mapping: KeyMapping) {
+        check(mapping.isDefault) { "${mapping.name} key binding is not set to default" }
+        KeyMapping.click(mapping.defaultKey)
+    }
+
+    override fun runTest(context: ClientGameTestContext) {
+        context.worldBuilder().create().use { singleplayer ->
+            singleplayer.connection.waitForChunksRender()
+            singleplayer.server.runCommand("item replace entity @p container.0 with torched:sticky_torch 4")
+            singleplayer.server.runCommand("item replace entity @p container.1 with torched:sticky_copper_torch 4")
+
+            context.onClient { client ->
+                clickDefaultKey(client.options.keyHotbarSlots[0])
+            }
+            context.waitTick()
+            singleplayer.connection.waitForServerboundPackets()
+            singleplayer.connection.waitForClientboundPackets()
+            context.assertInventorySlotSelected(singleplayer, 0)
+            context.assertInventorySlotItemAndCount(
+                singleplayer, slot = 0, item = ModItems.sticky(TorchVariant.TORCH), clientCount = 4, serverCount = 4
+            )
+            context.assertInventorySlotItemAndCount(
+                singleplayer, slot = 1, item = ModItems.sticky(TorchVariant.COPPER), clientCount = 4, serverCount = 4
+            )
+
+            context.onClient { client ->
+                // queue quick switch then throw
+                clickDefaultKey(client.options.keyHotbarSlots[1])
+                clickDefaultKey(ModKeyBindings.THROW_TORCH)
+            }
+            context.waitTick()
+            singleplayer.connection.waitForServerboundPackets()
+            singleplayer.connection.waitForClientboundPackets()
+            context.assertInventorySlotSelected(singleplayer, 1)
+            context.assertInventorySlotItemAndCount(
+                singleplayer, slot = 0, item = ModItems.sticky(TorchVariant.TORCH), clientCount = 4, serverCount = 4
+            )
+            context.assertInventorySlotItemAndCount(
+                singleplayer, slot = 1, item = ModItems.sticky(TorchVariant.COPPER), clientCount = 3, serverCount = 3
+            )
+        }
+    }
+}
+
 //region Test Helpers
 
 private fun ClientGameTestContext.preservingConfig(body: () -> Unit) {
@@ -361,6 +409,38 @@ private fun ClientGameTestContext.assertTorchCounts(
     singleplayer.server.onServer { server ->
         val count = server.playerList.players.first().getItemInHand(hand).count
         check(count == serverCount) { "server: expected $serverCount torches, got $count" }
+    }
+}
+
+private fun ClientGameTestContext.assertInventorySlotSelected(singleplayer: TestSingleplayerContext, slot: Int) {
+    onClient { client ->
+        check(slot == client.player!!.inventory.selectedSlot) {
+            "client: expected slot $slot to be selected"
+        }
+    }
+    singleplayer.server.onServer { server ->
+        check(slot == server.playerList.players.first().inventory.selectedSlot) {
+            "server: expected slot $slot to be selected"
+        }
+    }
+}
+
+private fun ClientGameTestContext.assertInventorySlotItemAndCount(
+    singleplayer: TestSingleplayerContext,
+    slot: Int,
+    item: Item,
+    clientCount: Int,
+    serverCount: Int,
+) {
+    onClient { client ->
+        val stack = client.player!!.inventory.getItem(slot)
+        check(clientCount == stack.count) { "client: expected slot $slot to contain $clientCount items" }
+        check(item == stack.item) { "client: expected slot $slot to contain $item" }
+    }
+    singleplayer.server.onServer { server ->
+        val stack = server.playerList.players.first().inventory.getItem(slot)
+        check(serverCount == stack.count) { "server: expected slot $slot to contain $serverCount items" }
+        check(item == stack.item) { "server: expected slot $slot to contain $item" }
     }
 }
 
