@@ -33,6 +33,10 @@ gametest configuration
 
 `./gradlew runClientGameTest`
 
+- Validate class tweaker access widening:
+
+`./gradlew validateAccessWidener`
+
 ## Resources and references
 
 ### Tools

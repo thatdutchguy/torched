@@ -1,0 +1,4 @@
+classTweaker v1 official
+
+# needed to more closely mimic the Item.use() behavior
+accessible method net/minecraft/client/multiplayer/MultiPlayerGameMode ensureHasSentCarriedItem ()V

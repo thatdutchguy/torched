@@ -38,6 +38,8 @@ loom {
             sourceSet(sourceSets.test.get())
         }
     }
+
+    accessWidenerPath = file("src/main/resources/torched.classtweaker")
 }
 
 fabricApi {

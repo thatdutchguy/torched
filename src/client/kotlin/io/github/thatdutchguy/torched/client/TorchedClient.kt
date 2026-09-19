@@ -62,6 +62,8 @@ object TorchedClient : ClientModInitializer {
             return InteractionResult.FAIL
         }
 
+        val gameMode = Minecraft.getInstance().gameMode ?: return null
+        gameMode.ensureHasSentCarriedItem()
         ClientPlayNetworking.send(ThrowTorchPayload(hand))
         TorchThrowing.applyThrowLocally(player, hand)
         return InteractionResult.SUCCESS

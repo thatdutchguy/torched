@@ -41,6 +41,7 @@
             }
         ]
     },
+    "accessWidener": "torched.classtweaker",
     "depends": {
         "fabricloader": ">=0.19.5",
         "minecraft": "~26.2",
