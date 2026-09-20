@@ -1,0 +1,22 @@
+name: Dependency Submission
+
+on:
+  push:
+    branches: ['main']
+
+permissions:
+  contents: write
+
+jobs:
+  dependency-submission:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v7
+    - name: setup jdk
+      uses: actions/setup-java@v5
+      with:
+        java-version: 25
+        distribution: 'microsoft'
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@v6
