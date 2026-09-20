@@ -20,8 +20,12 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.SimpleContainer
+import net.minecraft.world.SimpleMenuProvider
+import net.minecraft.world.inventory.ChestMenu
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Blocks
 import org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT
@@ -145,6 +149,57 @@ class RefusedThrowIsResynced : FabricClientGameTest {
 
         context.assertTorchCounts(singleplayer, clientCount = 4, serverCount = 4)
     }
+}
+
+// NOTE: This test exercises the internal code paths, rather than using a separate server to test a genuine disagreement
+class RefusedThrowIsResyncedWhenContainerIsOpen : FabricClientGameTest {
+    private fun openTestChest(singleplayer: TestSingleplayerContext) {
+        singleplayer.server.onServer { server ->
+            val player = server.playerList.players.first()
+            val slotCount = 3 * 9 // single chest has 3 rows of 9 slots
+            val contents = SimpleContainer(slotCount)
+
+            player.openMenu(
+                SimpleMenuProvider(
+                    { containerId, inventory, _ ->
+                        ChestMenu.threeRows(containerId, inventory, contents)
+                    },
+                    Component.literal("Test Chest")
+                )
+            )
+
+            check(player.containerMenu is ChestMenu) { "server: expected chest menu to be open" }
+        }
+        singleplayer.connection.waitForClientboundPackets()
+    }
+
+    override fun runTest(context: ClientGameTestContext) =
+        context.withTorches(4, InteractionHand.OFF_HAND) { singleplayer ->
+            openTestChest(singleplayer)
+
+            context.onClient { client ->
+                val player = client.player!!
+                check(player.containerMenu is ChestMenu) { "client: expected chest menu to be open" }
+                check(player.mainHandItem.isEmpty) { "client: expected main to be empty" }
+
+                // Optimistic shrink, as the real client does
+                TorchThrowing.applyThrowLocally(player, InteractionHand.OFF_HAND)
+                check(player.offhandItem.count == 3)
+
+                // Ask the server to throw the empty main hand, which it will refuse
+                ClientPlayNetworking.send(ThrowTorchPayload(InteractionHand.MAIN_HAND))
+            }
+
+            singleplayer.connection.waitForServerboundPackets()
+            singleplayer.connection.waitForClientboundPackets()
+
+            context.assertTorchCounts(
+                singleplayer,
+                hand = InteractionHand.OFF_HAND,
+                clientCount = 4,
+                serverCount = 4,
+            )
+        }
 }
 
 class ServerRateLimitIsEnforced : FabricClientGameTest {
