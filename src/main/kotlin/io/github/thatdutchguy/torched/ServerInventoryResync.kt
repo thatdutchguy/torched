@@ -28,7 +28,7 @@ object ServerInventoryResync {
 
     private fun send(server: MinecraftServer, playerId: UUID): Boolean {
         val player = server.playerList.getPlayer(playerId) ?: return false
-        player.containerMenu.sendAllDataToRemote()
+        player.inventoryMenu.sendAllDataToRemote()
         return true
     }
 }

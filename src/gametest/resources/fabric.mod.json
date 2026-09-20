@@ -48,6 +48,7 @@
             "io.github.thatdutchguy.torched.gametest.client.UseHookDisabledPlacesInstead",
             "io.github.thatdutchguy.torched.gametest.client.ThrowKeyRespectsBinding",
             "io.github.thatdutchguy.torched.gametest.client.RefusedThrowIsResynced",
+            "io.github.thatdutchguy.torched.gametest.client.RefusedThrowIsResyncedWhenContainerIsOpen",
             "io.github.thatdutchguy.torched.gametest.client.ServerRateLimitIsEnforced",
             "io.github.thatdutchguy.torched.gametest.client.ServerRateLimitIsEnforcedInCreativeMode",
             "io.github.thatdutchguy.torched.gametest.client.VanillaTorchThrowingPolicyPublishes",
